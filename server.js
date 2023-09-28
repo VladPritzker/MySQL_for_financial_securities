@@ -5,8 +5,13 @@ const app = express();
 
 app.use(cors()); // Используйте CORS middleware
 
+app.use(express.json());
+
 
 // Подключение к базе данных
+
+
+
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'vlad',
@@ -22,8 +27,17 @@ db.connect((err) => {
   }
 });
 
-// Обработка запросов API
-// Например, создайте маршрут для получения всех инвесторов
+
+
+
+//                                      TESTTESTTESTTEST
+
+
+
+
+
+
+
 app.get('/api/investors', (req, res) => {
   db.query('SELECT * FROM investors', (err, results) => {
     if (err) {
@@ -35,35 +49,119 @@ app.get('/api/investors', (req, res) => {
   });
 });
 
-app.delete('/api/investors/:id', (req, res) => {
-  const { id } = req.params; // Получите идентификатор инвестора из параметров URL
+app.get('/', (req, res) => {
+  res.send('Добро пожаловать на сервер');
+});
 
-  // Выполните SQL-запрос для удаления инвестора по идентификатору
-  db.query('DELETE FROM investors WHERE id = ?', [id], (err, results) => {
+
+
+
+
+
+//                                      TESTTESTTESTTEST
+
+
+
+
+
+
+
+
+
+
+
+app.get('/api/investors/max-id', (req, res) => {
+  // Execute an SQL query to get the maximum ID from your database
+  db.query('SELECT MAX(id) AS maxId FROM investors', (err, results) => {
     if (err) {
-      console.error('Ошибка при удалении инвестора из базы данных:', err);
-      res.status(500).json({ error: 'Ошибка сервера' });
+      console.error('Error fetching maximum ID:', err);
+      res.status(500).json({ error: 'Error fetching maximum ID' });
       return;
     }
 
-    // Если успешно удалено, отправьте ответ с успехом
-    res.json({ success: true });
+    // Extract the maximum ID from the query results
+    const maxId = results[0].maxId || 0;
+
+    // Send the maximum ID as a JSON response
+    res.json({ maxId });
   });
 });
 
+
+
+
+
+//                                      TESTTESTTESTTEST
+
+
+
+
+
+app.get('/api/investors/customId/:customId', (req, res) => {
+  const { customId } = req.params;
+
+  // Выполните SQL-запрос для поиска инвестора по customId
+  db.query('SELECT * FROM investors WHERE customId = ?', [customId], (err, results) => {
+    if (err) {
+      console.error('Ошибка при получении инвестора по customId:', err);
+      res.status(500).json({ error: 'Ошибка при получении инвестора по customId' });
+      return;
+    }
+
+    // Проверьте, существует ли инвестор с указанным customId
+    if (results.length === 0) {
+      // Если инвестор не найден, верните статус 404 и сообщение об ошибке
+      res.status(404).json({ error: 'Инвестор не найден' });
+    } else {
+      // Если инвестор найден, верните данные инвестора как JSON-ответ
+      res.json(results[0]);
+    }
+  });
+});
+
+
   
 
-// Другие маршруты и обработчики запросов могут быть добавлены здесь
 
-// Запуск сервера на порту 3000
+
+
+//                                      TESTTESTTESTTEST
+
+app.get('/api/investors/:id', (req, res) => {
+  const { id } = req.params; // Получите ID инвестора из параметров URL
+
+  // Выполните SQL-запрос для получения инвестора по ID из вашей базы данных
+  db.query('SELECT * FROM investors WHERE id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Ошибка при получении инвестора по ID:', err);
+      res.status(500).json({ error: 'Ошибка при получении инвестора по ID' });
+      return;
+    }
+
+    // Проверьте, существует ли инвестор с указанным ID
+    if (results.length === 0) {
+      // Если инвестор не найден, верните статус 404 и сообщение об ошибке
+      res.status(404).json({ error: 'Инвестор не найден' });
+    } else {
+      // Если инвестор найден, верните данные инвестора как JSON-ответ
+      res.json(results[0]);
+    }
+  });
+});
+
+//                                      TESTTESTTESTTEST
+
+
+
+
+
+
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
   console.log(`Сервер запущен на порту ${port}`);
 });
 
-app.get('/', (req, res) => {
-    res.send('Добро пожаловать на сервер');
-  });
+
   
 
 
@@ -83,14 +181,21 @@ app.get('/', (req, res) => {
       res.json({ success: true });
     });
   });
-  
+
+
+
+
+  //                                      TESTTESTTESTTEST
+
+
+
 
   app.post('/api/investors', (req, res) => {
-    const newInvestor = req.body; // Получите нового инвестора из тела запроса
+    const newInvestor = req.body;
   
-    // Выполните SQL-запрос для добавления нового инвестора в базу данных
-    db.query('INSERT INTO investors (name, lastName, investedAmount, onrise) VALUES (?, ?, ?, ?)', 
-      [newInvestor.name, newInvestor.lastName, newInvestor.investedAmount, newInvestor.onrise], 
+    db.query(
+      'INSERT INTO investors (name, lastName, investedAmount, onrise, customId) VALUES (?, ?, ?, ?, ?)', 
+      [newInvestor.name, newInvestor.lastName, newInvestor.investedAmount, newInvestor.onrise, newInvestor.customId], // Добавьте "," здесь
       (err, results) => {
         if (err) {
           console.error('Ошибка при добавлении нового инвестора в базу данных:', err);
@@ -103,4 +208,31 @@ app.get('/', (req, res) => {
       }
     );
   });
+  
+  
+  
+  
+  //                                      TESTTESTTESTTEST
+
+
+
+
+
+
+  app.delete('/api/investors/customId/:customId', (req, res) => {
+    const { customId } = req.params; // Получите customId инвестора из параметров URL
+  
+    // Выполните SQL-запрос для удаления инвестора по customId
+    db.query('DELETE FROM investors WHERE customId = ?', [customId], (err, results) => {
+      if (err) {
+        console.error('Ошибка при удалении инвестора из базы данных:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+        return;
+      }
+  
+      console.log(`Инвестор с customId ${customId} успешно удален.`);
+      res.json({ success: true });
+    });
+  });
+  
   
