@@ -165,22 +165,24 @@ app.listen(port, () => {
   
 
 
-  app.put('/api/investors/:id', (req, res) => {
-    const { id } = req.params; // Получите идентификатор инвестора из параметров URL
-    const { onrise } = req.body; // Получите данные для обновления из тела запроса
-  
-    // Выполните SQL-запрос для обновления состояния onrise инвестора по идентификатору
-    db.query('UPDATE investors SET onrise = ? WHERE id = ?', [onrise, id], (err, results) => {
-      if (err) {
-        console.error('Ошибка при обновлении инвестора в базе данных:', err);
-        res.status(500).json({ error: 'Ошибка сервера' });
-        return;
-      }
-  
-      // Если успешно обновлено, отправьте ответ с успехом
-      res.json({ success: true });
-    });
+app.put('/api/investors/customId/:customId', (req, res) => {
+  const { customId } = req.params; // Получите идентификатор инвестора из параметров URL
+  const { onrise } = req.body; // Получите данные для обновления из тела запроса
+
+  // Выполните SQL-запрос для обновления состояния onrise инвестора по идентификатору
+  db.query('UPDATE investors SET onrise = ? WHERE customId = ?;', [1 - onrise, customId], (err, results) => {
+    if (err) {
+      console.error('Ошибка при обновлении инвестора в базе данных:', err);
+      res.status(500).json({ error: 'Ошибка сервера' });
+      return;
+    }
+
+    // Если успешно обновлено, отправьте ответ с успехом
+    res.json({ success: true });
   });
+});
+
+
 
 
 
