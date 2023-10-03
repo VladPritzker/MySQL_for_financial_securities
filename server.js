@@ -170,7 +170,7 @@ app.put('/api/investors/customId/:customId', (req, res) => {
   const { onrise } = req.body; // Получите данные для обновления из тела запроса
 
   // Выполните SQL-запрос для обновления состояния onrise инвестора по идентификатору
-  db.query('UPDATE investors SET onrise = ? WHERE customId = ?;', [1 - onrise, customId], (err, results) => {
+  db.query('UPDATE investors SET onrise = ? WHERE customId = ?;', [onrise, customId], (err, results) => {
     if (err) {
       console.error('Ошибка при обновлении инвестора в базе данных:', err);
       res.status(500).json({ error: 'Ошибка сервера' });
@@ -181,6 +181,7 @@ app.put('/api/investors/customId/:customId', (req, res) => {
     res.json({ success: true });
   });
 });
+
 
 
 
@@ -236,5 +237,4 @@ app.put('/api/investors/customId/:customId', (req, res) => {
       res.json({ success: true });
     });
   });
-  
   
