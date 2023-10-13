@@ -1,14 +1,14 @@
 const express = require('express');
 const mysql = require('mysql2');
-const cors = require('cors'); 
+const cors = require('cors'); // Импорт библиотеки CORS
 const app = express();
 
-app.use(cors());
+app.use(cors()); // Используйте CORS middleware
 
 app.use(express.json());
 
 
-
+// Подключение к базе данных
 
 
 
@@ -165,60 +165,35 @@ app.listen(port, () => {
   
 
 
-// Update onrise or investedAmount for an investor
-// Update onrise or investedAmount for an investor
 app.put('/api/investors/customId/:customId', (req, res) => {
-  const { customId } = req.params; // Get the customId from the URL params
-  const { onrise, investedAmount } = req.body; // Get the new values from the request body
+  const { customId } = req.params; // Получите идентификатор инвестора из параметров URL
+  const { updateType } = req.body; // Получите updateType из тела запроса
+  let columnToUpdate;
 
-  // Determine which column to update based on the presence of 'onrise' or 'investedAmount' in the request body
-  let updateColumn;
-  let updateValue;
-  if (onrise !== undefined && onrise !== null) {
-    updateColumn = 'onrise';
-    updateValue = onrise;
-  } else if (investedAmount !== undefined && investedAmount !== null) { // Update 'investedAmount' here
-    updateColumn = 'investedAmount';
-    updateValue = investedAmount;
+  // Определите, какой столбец базы данных обновлять в зависимости от updateType
+  if (updateType === 'onrise') {
+    columnToUpdate = 'onrise';
+  } else if (updateType === 'investedAmount') {
+    columnToUpdate = 'investedAmount';
   } else {
-    res.status(400).json({ error: 'Invalid request. Missing update data.' });
+    res.status(400).json({ error: 'Недопустимый updateType' });
     return;
   }
-  
-  // Check if an investor with the given customId exists
-  db.query(
-    'SELECT * FROM investors WHERE customId = ?',
-    [customId],
-    (err, results) => {
-      if (err) {
-        console.error('Error checking customId existence:', err);
-        res.status(500).json({ error: 'Server error' });
-        return;
-      }
 
-      if (results.length === 0) {
-        // If investor not found, return 404 Not Found
-        res.status(404).json({ error: 'Investor not found' });
-        return;
-      }
+  // Получите данные для обновления из тела запроса
+  const dataToUpdate = req.body[updateType];
 
-      // Execute an SQL query to update the specified column for the investor by customId
-      db.query(
-        `UPDATE investors SET ${updateColumn} = ? WHERE customId = ?;`,
-        [updateValue, customId],
-        (err, updateResults) => {
-          if (err) {
-            console.error('Error updating database:', err);
-            res.status(500).json({ error: 'Server error' });
-            return;
-          }
-
-          // If updated successfully, send a response with success
-          res.json({ success: true });
-        }
-      );
+  // Выполните SQL-запрос для обновления соответствующего столбца инвестора по идентификатору
+  db.query(`UPDATE investors SET ${columnToUpdate} = ? WHERE customId = ?;`, [dataToUpdate, customId], (err, results) => {
+    if (err) {
+      console.error('Ошибка при обновлении инвестора в базе данных:', err);
+      res.status(500).json({ error: 'Ошибка сервера' });
+      return;
     }
-  );
+
+    // Если успешно обновлено, отправьте ответ с успехом
+    res.json({ success: true });
+  });
 });
 
 
@@ -277,4 +252,3 @@ app.put('/api/investors/customId/:customId', (req, res) => {
       res.json({ success: true });
     });
   });
-  
