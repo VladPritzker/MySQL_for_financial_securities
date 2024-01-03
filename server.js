@@ -252,3 +252,64 @@ app.put('/api/investors/customId/:customId', (req, res) => {
       res.json({ success: true });
     });
   });
+
+
+
+///////////CALENDAR/////////////////
+
+  app.get('/api/calendar', (req, res) => {
+    db.query('SELECT * FROM calendar', (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        res.status(500).json({ error: 'Server error' });
+        return;
+      }
+      res.json(results);
+    });
+  });
+  
+
+  
+  
+
+  app.get('/api/calendar/:date', (req, res) => {
+    const { date } = req.params;
+
+    db.query('SELECT * FROM calendar WHERE date = ?', [date], (err, results) => {
+        if (err) {
+            console.error('Error executing SQL query:', err);
+            res.status(500).json({ error: 'Server error' });
+            return;
+        }
+
+        if (results.length === 0) {
+            res.status(404).json({ error: 'Day not found' });
+        } else {
+            res.json(results[0]);
+        }
+    });
+});
+
+
+app.put('/api/calendar/:date', (req, res) => {
+  const { date } = req.params;
+  const { slept, studied, wokeUp } = req.body;
+
+  // Construct SQL query
+  const query = `
+    UPDATE calendar
+    SET slept = ?, studied = ?, wokeUp = ?
+    WHERE date = ?;
+  `;
+
+  // Execute SQL query
+  db.query(query, [slept, studied, wokeUp, date], (err, result) => {
+    if (err) {
+      console.error('Error updating calendar:', err);
+      res.status(500).json({ error: "Error updating calendar" });
+      return;
+    }
+    res.json({ message: 'Calendar updated successfully' })
+  });
+});
+  ///////////CALENDAR/////////////////
